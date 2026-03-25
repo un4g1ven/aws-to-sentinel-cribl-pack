@@ -1,0 +1,9 @@
+{
+  "name": "aws-sentinel-packv3",
+  "version": "1.0.3",
+  "displayName": "AWS Logs to Microsoft Sentinel",
+  "description": "Production-grade Cribl Pack that ingests 9 AWS log types (CloudTrail, VPC Flow, GuardDuty, WAF, Route53, ALB, NLB, S3 Access, Security Hub) via S3/SQS, transforms them to match native Sentinel table schemas, and delivers via Azure Monitor Logs Ingestion API with DCRs.",
+  "author": "David Maxwell via Claude",
+  "tags": ["aws", "sentinel", "azure", "cloudtrail", "vpcflow", "guardduty", "waf", "security", "siem", "dcr"],
+  "minCriblVersion": "4.0.0"
+}

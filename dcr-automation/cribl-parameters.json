@@ -1,0 +1,11 @@
+{
+  "IDprefix": "sentinel-",
+  "IDsuffix": "",
+  "description": "Parameters for Cribl destination ID naming convention (Maxwell Labs - aws-sentinel-packv3)",
+  "notes": {
+    "IDprefix": "Prefix for the Cribl destination ID. Combined with table name to form IDs like 'sentinel-AWSCloudTrail'.",
+    "IDsuffix": "Suffix for the Cribl destination ID. Empty string keeps names concise.",
+    "authentication": "Azure AD authentication details (tenantId, clientId) are stored in azure-parameters.json. Client secret is set to '<replace me>' placeholder for manual configuration in Cribl Stream.",
+    "pack": "Destinations generated here correspond to outputs in aws-sentinel-packv3. Each DCR maps to one Cribl destination per table."
+  }
+}

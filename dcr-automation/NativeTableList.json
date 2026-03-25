@@ -1,0 +1,15 @@
+[
+    "CommonSecurityLog",
+    "SecurityEvent",
+    "WindowsEvent",
+    "Syslog",
+    "AWSCloudTrail",
+    "AWSVPCFlow",
+    "AWSGuardDuty",
+    "AWSWAF",
+    "AWSRoute53Resolver",
+    "AWSALBAccessLogs",
+    "AWSNLBAccessLogs",
+    "AWSS3ServerAccess",
+    "AWSSecurityHubFindings"
+]
