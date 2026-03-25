@@ -1,0 +1,141 @@
+{
+  "Records": [
+    {
+      "eventVersion": "1.09",
+      "userIdentity": {
+        "type": "AssumedRole",
+        "principalId": "AROA3XFRBF23LDEXAMPLE:session-name",
+        "arn": "arn:aws:sts::123456789012:assumed-role/Admin/session-name",
+        "accountId": "123456789012",
+        "accessKeyId": "ASIA3XFRBF23EXAMPLE",
+        "sessionContext": {
+          "sessionIssuer": {
+            "type": "Role",
+            "principalId": "AROA3XFRBF23LDEXAMPLE",
+            "arn": "arn:aws:iam::123456789012:role/Admin",
+            "accountId": "123456789012",
+            "userName": "Admin"
+          },
+          "attributes": {
+            "creationDate": "2025-03-15T10:00:00Z",
+            "mfaAuthenticated": "true"
+          }
+        }
+      },
+      "eventTime": "2025-03-15T10:05:23Z",
+      "eventSource": "ec2.amazonaws.com",
+      "eventName": "DescribeInstances",
+      "awsRegion": "us-east-1",
+      "sourceIPAddress": "203.0.113.50",
+      "userAgent": "aws-cli/2.15.0 Python/3.11.6 Linux/5.15.0",
+      "requestParameters": {
+        "instancesSet": {},
+        "filterSet": {}
+      },
+      "responseElements": null,
+      "requestID": "abcd1234-ef56-7890-gh12-ijklmnop3456",
+      "eventID": "12345678-abcd-ef01-2345-6789abcdef01",
+      "readOnly": true,
+      "eventType": "AwsApiCall",
+      "managementEvent": true,
+      "recipientAccountId": "123456789012",
+      "eventCategory": "Management",
+      "tlsDetails": {
+        "tlsVersion": "TLsV1.3",
+        "cipherSuite": "TLS_AES_128_GCM_SHA256",
+        "clientProvidedHostHeader": "ec2.us-east-1.amazonaws.com"
+      }
+    },
+    {
+      "eventVersion": "1.09",
+      "userIdentity": {
+        "type": "IAMUser",
+        "principalId": "AIDA3XFRBF23EXAMPLE",
+        "arn": "arn:aws:iam::123456789012:user/developer",
+        "accountId": "123456789012",
+        "accessKeyId": "AKIA3XFRBF23EXAMPLE",
+        "userName": "developer"
+      },
+      "eventTime": "2025-03-15T10:10:45Z",
+      "eventSource": "s3.amazonaws.com",
+      "eventName": "CreateBucket",
+      "awsRegion": "us-west-2",
+      "sourceIPAddress": "198.51.100.25",
+      "userAgent": "aws-sdk-java/2.20.0",
+      "errorCode": "BucketAlreadyExists",
+      "errorMessage": "The requested bucket name is not available.",
+      "requestParameters": {
+        "bucketName": "my-test-bucket",
+        "Host": "s3.us-west-2.amazonaws.com",
+        "CreateBucketConfiguration": {
+          "LocationConstraint": "us-west-2",
+          "xmlns": "http://s3.amazonaws.com/doc/2006-03-01/"
+        }
+      },
+      "responseElements": null,
+      "additionalEventData": {
+        "SignatureVersion": "SigV4",
+        "CipherSuite": "ECDHE-RSA-AES128-GCM-SHA256",
+        "bytesTransferredIn": 0,
+        "AuthenticationMethod": "AuthHeader",
+        "x-amz-id-2": "example-id-2",
+        "bytesTransferredOut": 0
+      },
+      "requestID": "efgh5678-ij90-kl12-mn34-opqrstuvwx56",
+      "eventID": "87654321-dcba-fe10-5432-109876fedcba",
+      "readOnly": false,
+      "resources": [
+        {
+          "accountId": "123456789012",
+          "type": "AWS::S3::Bucket",
+          "ARN": "arn:aws:s3:::my-test-bucket"
+        }
+      ],
+      "eventType": "AwsApiCall",
+      "managementEvent": true,
+      "recipientAccountId": "123456789012",
+      "eventCategory": "Management",
+      "tlsDetails": {
+        "tlsVersion": "TLSv1.2",
+        "cipherSuite": "ECDHE-RSA-AES128-GCM-SHA256",
+        "clientProvidedHostHeader": "s3.us-west-2.amazonaws.com"
+      }
+    },
+    {
+      "eventVersion": "1.09",
+      "userIdentity": {
+        "type": "AWSService",
+        "invokedBy": "cloudformation.amazonaws.com"
+      },
+      "eventTime": "2025-03-15T10:15:00Z",
+      "eventSource": "iam.amazonaws.com",
+      "eventName": "CreateRole",
+      "awsRegion": "us-east-1",
+      "sourceIPAddress": "cloudformation.amazonaws.com",
+      "userAgent": "cloudformation.amazonaws.com",
+      "requestParameters": {
+        "roleName": "CloudFormation-ServiceRole",
+        "assumeRolePolicyDocument": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"cloudformation.amazonaws.com\"},\"Action\":\"sts:AssumeRole\"}]}",
+        "path": "/service-role/"
+      },
+      "responseElements": {
+        "role": {
+          "roleName": "CloudFormation-ServiceRole",
+          "roleId": "AIOA3XFRBF23NEWROLE",
+          "arn": "arn:aws:iam::123456789012:role/service-role/CloudFormation-ServiceRole",
+          "createDate": "Mar 15, 2025 10:15:00 AM",
+          "assumeRolePolicyDocument": "%7B%22Version%22%3A%222012-10-17%22%7D",
+          "path": "/service-role/"
+        }
+      },
+      "requestID": "mnop9012-qr34-st56-uv78-wxyzabcdef90",
+      "eventID": "aabbccdd-eeff-0011-2233-445566778899",
+      "readOnly": false,
+      "eventType": "AwsApiCall",
+      "managementEvent": true,
+      "recipientAccountId": "123456789012",
+      "eventCategory": "Management",
+      "serviceEventDetails": null
+    }
+  C
+}

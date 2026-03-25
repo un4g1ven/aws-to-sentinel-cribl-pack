@@ -1,0 +1,77 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "workspaceResourceId": {
+      "type": "string",
+      "metadata": {
+        "description": "The resource ID of the Log Analytics workspace where AWSS3ServerAccess data will be sent."
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Azure region for the Data Collection Rule."
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Insights/dataCollectionRules",
+      "apiVersion": "2021-09-01-preview",
+      "name": "dcr-aws-s3access",
+      "location": "[parameters('location')]",
+      "kind": "Direct",
+      "properties": {
+        "streamDeclarations": {
+          "Custom-AWSS3ServerAccessStream": {
+            "columns": [
+              { "name": "TimeGenerated", "type": "datetime" },
+              { "name": "BucketOwner", "type": "string" },
+              { "name": "Bucket", "type": "string" },
+              { "name": "RemoteIp", "type": "string" },
+              { "name": "Requester", "type": "string" },
+              { "name": "RequestId", "type": "string" },
+              { "name": "Operation", "type": "string" },
+              { "name": "Key", "type": "string" },
+              { "name": "RequestUri", "type": "string" },
+              { "name": "HttpStatus", "type": "int" },
+              { "name": "ErrorCode", "type": "string" },
+              { "name": "BytesSent", "type": "int" },
+              { "name": "ObjectSize", "type": "int" },
+              { "name": "TotalTime", "type": "int" },
+              { "name": "TurnAroundTime", "type": "string" },
+              { "name": "Referer", "type": "string" },
+              { "name": "UserAgent", "type": "string" },
+              { "name": "VersionId", "type": "string" },
+              { "name": "HostId", "type": "string" },
+              { "name": "SignatureVersion", "type": "string" },
+              { "name": "CipherSuite", "type": "string" },
+              { "name": "AuthenticationType", "type": "string" },
+              { "name": "HostHeader", "type": "string" },
+              { "name": "TLSVersion", "type": "string" },
+              { "name": "AccessPointARN", "type": "string" },
+              { "name": "ACLRequired", "type": "string" }
+            ]
+          }
+        },
+        "destinations": {
+          "logAnalytics": [
+            {
+              "workspaceResourceId": "[parameters('workspaceResourceId')]",
+              "name": "sentinel-workspace"
+            }
+          ]
+        },
+        "dataFlows": [
+          {
+            "streams": ["Custom-AWSS3ServerAccessStream"],
+            "destinations": ["sentinel-workspace"],
+            "outputStream": "Microsoft-AWSS3ServerAccess",
+            "transformKql": "source"
+          }
+        ]
+      }
+    }
+  C-?)

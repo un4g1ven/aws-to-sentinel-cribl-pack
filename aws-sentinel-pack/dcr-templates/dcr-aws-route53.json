@@ -1,0 +1,76 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "dataCollectionRuleName": {
+      "type": "string",
+      "defaultValue": "dcr-aws-route53",
+      "metadata": {
+        "description": "Name of the Data Collection Rule for AWS Route53 Resolver query logs."
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultVamlue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Azure region for the DCR resource."
+      }
+    },
+    "workspaceResourceId": {
+      "type": "string",
+      "metadata": {
+        "description": "Full ARM resource ID of the Log Analytics workspace backing Microsoft Sentinel."
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Insights/dataCollectionRules",
+      "apiVersion": "2021-09-01-preview",
+      "name": "[parameters('dataCollectionRuleName')]",
+      "location": "[parameters('location')]",
+      "kind": "Direct",
+      "properties": {
+        "streamDeclarations": {
+          "Custom-AWSRoute53ResolverStream": {
+            "columns": [
+              { "name": "AccountId",              "type": "string"   },
+              { "name": "Answers",               "type": "dynamic"  },
+              { "name": "FirewallDomainListId",   "type": "string"   },
+              { "name": "FirewallRuleAction",     "type": "string"   },
+              { "name": "FirewallRuleGroupId",    "type": "string"   },
+              { "name": "LogType",                "type": "string"   },
+              { "name": "QueryClass",             "type": "string"   },
+              { "name": "QueryName",              "type": "string"   },
+              { "name": "QueryType",              "type": "string"   },
+              { "name": "Rcode",                  "type": "string"   },
+              { "name": "Region",                 "type": "string"   },
+              { "name": "SrcAddr",                "type": "string"   },
+              { "name": "SrcIds",                 "type": "dynamic"  },
+              { "name": "SrcPort",                "type": "string"   },
+              { "name": "TimeGenerated",          "type": "datetime" },
+              { "name": "Transport",              "type": "string"   },
+              { "name": "Version",                "type": "string"   },
+              { "name": "VpcId",                  "type": "string"   }
+            ]
+          }
+        },
+        "destinations": {
+          "logAnalytics": [
+            {
+              "workspaceResourceId": "[parameters('workspaceResourceId')]",
+              "name": "sentinel-workspace"
+            }
+          ]
+        },
+        "dataFlows": [
+          {
+            "streams": [ "Custom-AWSRoute53ResolverStream" ],
+            "destinations": [ "sentinel-workspace" ],
+            "outputStream": "Microsoft-AWSRoute53Resolver",
+            "transformKql": "source"
+          }
+        ]
+      }
+    }
+  C-?)

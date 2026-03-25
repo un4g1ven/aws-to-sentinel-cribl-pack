@@ -1,0 +1,7 @@
+version account-id interface-id srcaddr dstaddr srcport dstport protocol packets bytes start end action log-status vpc-id subnet-id instance-id tcp-flags type pkt-srcaddr pkt-dstaddr region az-id sublocation-type sublocation-id pkt-src-aws-service pkt-dst-aws-service flow-direction traffic-path
+5 123456789012 eni-0a1b2c3d4e5f6g7h8 10.0.1.42 52.94.133.200 49152 443 6 12 5040 1711324800 1711324860 ACCEPT OK vpc-0abc123def456789 subnet-0aaa111bbb222ccc i-0123456789abcdef0 2 IPv4 10.0.1.42 52.94.133.200 us-east-1 use1-az1 - - - AMAZON egress 1
+5 123456789012 eni-0a1b2c3d4e5f6g7h8 52.94.133.200 10.0.1.42 443 49152 6 10 15280 1711324800 1711324860 ACCEPT OK vpc-0abc123def456789 subnet-0aaa111bbb222ccc i-0123456789abcdef0 18 IPv4 52.94.133.200 10.0.1.42 us-east-1 use1-az1 - - AMAZON - ingress 1
+5 123456789012 eni-0a1b2c3d4e5f6g7h8 198.51.100.7 10.0.1.42 54321 22 6 3 180 1711324800 1711324860 REJECT OK vpc-0abc123def456789 subnet-0aaa111bbb222ccc i-0123456789abcdef0 2 IPv4 198.51.100.7 10.0.1.42 us-east-1 use1-az1 - - - - ingress 8
+2 123456789012 eni-0ff99aabb1122ccdd 172.16.0.10 10.0.2.55 8080 80 6 25 12800 1711324920 1711324980 ACCEPT OK - - - - - - - - - - - - - -
+5 987654321098 eni-0deadbeef12345678 10.0.3.100 10.0.3.200 55000 3306 6 100 65000 1711325040 1711325100 ACCEPT OK vpc-0def456ghi789012 subnet-0ddd444eee555fff i-0abcdef1234567890 2 IPv4 10.0.3.100 10.0.3.200 us-west-2 usw2-az2 - - - - egress 1
+2 123456789012 eni-0ff99aabb1122ccdd 10.0.2.55 203.0.113.50 80 12345 17 5 2048 1711325100 1711325160 ACCEPT SKIPDATA - - - - - - - - - - - - - -

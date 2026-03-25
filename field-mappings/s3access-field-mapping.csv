@@ -1,0 +1,33 @@
+AWS Field,Position,Sentinel Column,Sentinel Type,Notes
+Bucket Owner,1,BucketOwner,string,Canonical user ID of source bucket owner
+Bucket,2,Bucket,string,Name of the bucket
+Time,3,TimeGenerated,datetime,"Bracketed field [dd/Mon/yyyy:HH:mm:ss +0000] → convert to ISO 8601"
+Remote IP,4,RemoteIp,string,IP address of the requester
+Requester,5,Requester,string,Canonical user ID or dash for unauthenticated
+Request ID,6,RequestId,string,Unique request identifier
+Operation,7,Operation,string,"e.g., REST.GET.OBJECT, REST.PUT.OBJECT"
+Key,8,Key,string,Object key (name) or dash
+Request-URI,9,RequestUri,string,"Quoted field: ""GET /bucket/key HTTP/1.1"""
+HTTP status,10,HttpStatus,int,Numeric HTTP status code
+Error Code,11,ErrorCode,string,S3 error code or dash
+Bytes Sent,12,BytesSent,int,Response bytes sent (excluding HTTP overhead)
+Object Size,13,ObjectSize,int,Total size of the object
+Total Time,14,TotalTime,int,Request flight time in milliseconds
+Turn-Around Time,15,TurnAroundTime,string,S3 processing time in milliseconds (string in Sentinel)
+Referer,16,Referer,string,Quoted field: HTTP Referer header
+User-Agent,17,UserAgent,string,Quoted field: HTTP User-Agent header
+Version Id,18,VersionId,string,Object version ID or dash
+Host Id,19,HostId,string,x-amz-id-2 extended request ID
+Signature Version,20,SignatureVersion,string,"SigV2, SigV4, or dash"
+Cipher Suite,21,CipherSuite,string,TLS cipher for HTTPS or dash
+Authentication Type,22,AuthenticationType,string,"AuthHeader, QueryString, or dash"
+Host Header,23,HostHeader,string,Endpoint used to connect to S3
+TLS version,24,TLSVersion,string,"TLSv1.1, TLSv1.2, TLSv1.3, or dash"
+Access Point ARN,25,AccessPointARN,string,ARN of access point (if used) or dash
+aclRequired,26,ACLRequired,string,Yes if ACL authorization was required or dash
+---,---,---,---,System columns (auto-populated by Sentinel)
+N/A,N/A,_BilledSize,real,System: record size in bytes
+N/A,N/A,_IsBillable,string,System: billing flag
+N/A,N/A,SourceSystem,string,System: source system identifier
+N/A,N/A,TenantId,string,System: workspace tenant ID
+N/A,N/A,Type,string,System: table name (AWSS3ServerAccess)

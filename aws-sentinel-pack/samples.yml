@@ -1,0 +1,5 @@
+samples:
+  cloudtrail-sample:
+    description: "Sample AWS CloudTrail events (3 records: AssumedRole read, IAMUser write with error, AWSService write)"
+    fileType: json
+    pipeline: aws-cloudtrail

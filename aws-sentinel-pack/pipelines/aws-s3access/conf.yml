@@ -1,0 +1,167 @@
+output: default
+streamtags: []
+groups: {}
+asyncFuncTimeout: 1000
+functions:
+  - id: comment
+    filter: "true"
+    disabled: false
+    conf:
+      comment: >-
+        AWS S3 Server Access Logs → Microsoft Sentinel AWSS3ServerAccess table.
+        Parses space-delimited S3 access log entries with bracketed time field
+        and quoted fields (Request-URI, Referer, User-Agent).
+        Time format [dd/Mon/yyyy:HH:mm:ss +0000] converted to ISO 8601.
+        26 fields: positions 25-26 (AccessPointARN, ACLRequired) are optional.
+
+  - id: regex_extract
+    filter: "true"
+    disabled: false
+    conf:
+      source: _raw
+      iterations: 100
+      overwrite: false
+      regex: >-
+        /^(?<s3_bucket_owner>\S+)\s+(?<s3_bucket>\S+)\s+\[(?<s3_time>[^\]]*)\]\s+(?<s3_remote_ip>\S+)\s+(?<s3_requester>\S+)\s+(?<s3_request_id>\S+)\s+(?<s3_operation>\S+)\s+(?<s3_key>\S+)\s+"(?<s3_request_uri>[^"]*)"\s+(?<s3_http_status>\S+)\s+(?<s3_error_code>\S+)\s+(?<s3_bytes_sent>\S+)\s+(?<s3_object_size>\S+)\s+(?<s3_total_time>\S+)\s+(?<s3_turn_around_time>\S+)\s+"(?<s3_referer>[^"]*)"\s+"(?<s3_user_agent>[^"]*)"\s+(?<s3_version_id>\S+)\s+(?<s3_host_id>\S+)\s+(?<s3_sig_version>\S+)\s+(?<s3_cipher_suite>\S+)\s+(?<s3_auth_type>\S+)\s+(?<s3_host_header>\S+)\s+(?<s3_tls_version>\S+)(?:\s+(?<s3_access_point_arn>\S+))?(?:\s+(?<s3_acl_required>\S+))?/
+
+  - id: drop
+    filter: "!s3_bucket_owner || s3_bucket_owner === '-'"
+    disabled: false
+    conf:
+      remove: []
+    description: Drop events that failed to parse
+
+  - id: eval
+    filter: "true"
+    disabled: false
+    conf:
+      add:
+        - disabled: false
+          name: TimeGenerated
+          value: >-
+            (function(){
+              var m = {'Jan':'01','Feb':'02','Mar':'03','Apr':'04','May':'05','Jun':'06','Jul':'07','Aug':'08','Sep':'09','Oct':'10','Nov':'11','Dec':'12'};
+              var p = s3_time ? s3_time.match(/(\\d{2})\\/(\\w{3})\\/(\\d{4}):(\\d{2}):(\\d{2}):(\\d{2})\\s+([+-]\\d{4})/) : null;
+              return p ? p[3]+'-'+m[p[2]]+'-'+p[1]+'T'+p[4]+':'+p[5]+':'+p[6]+'.000Z' : (s3_time || new Date().toISOString());
+            })()
+        - disabled: false
+          name: BucketOwner
+          value: "s3_bucket_owner && s3_bucket_owner !== '-' ? s3_bucket_owner : undefined"
+        - disabled: false
+          name: Bucket
+          value: "s3_bucket && s3_bucket !== '-' ? s3_bucket : undefined"
+        - disabled: false
+          name: RemoteIp
+          value: "s3_remote_ip && s3_remote_ip !== '-' ? s3_remote_ip : undefined"
+        - disabled: false
+          name: Requester
+          value: "s3_requester && s3_requester !== '-' ? s3_requester : undefined"
+        - disabled: false
+          name: RequestId
+          value: "s3_request_id && s3_request_id !== '-' ? s3_request_id : undefined"
+        - disabled: false
+          name: Operation
+          value: "s3_operation && s3_operation !== '-' ? s3_operation : undefined"
+        - disabled: false
+          name: Key
+          value: "s3_key && s3_key !== '-' ? s3_key : undefined"
+        - disabled: false
+          name: RequestUri
+          value: "s3_request_uri && s3_request_uri !== '-' ? s3_request_uri : undefined"
+        - disabled: false
+          name: HttpStatus
+          value: "s3_http_status && s3_http_status !== '-' ? Number(s3_http_status) : undefined"
+        - disabled: false
+          name: ErrorCode
+          value: "s3_error_code && s3_error_code !== '-' ? s3_error_code : undefined"
+        - disabled: false
+          name: BytesSent
+          value: "s3_bytes_sent && s3_bytes_sent !== '-' ? Number(s3_bytes_sent) : undefined"
+        - disabled: false
+          name: ObjectSize
+          value: "s3_object_size && s3_object_size !== '-' ? Number(s3_object_size) : undefined"
+        - disabled: false
+          name: TotalTime
+          value: "s3_total_time && s3_total_time !== '-' ? Number(s3_total_time) : undefined"
+        - disabled: false
+          name: TurnAroundTime
+          value: "s3_turn_around_time && s3_turn_around_time !== '-' ? s3_turn_around_time : undefined"
+        - disabled: false
+          name: Referer
+          value: "s3_referer && s3_referer !== '-' ? s3_referer : undefined"
+        - disabled: false
+          name: UserAgent
+          value: "s3_user_agent && s3_user_agent !== '-' ? s3_user_agent : undefined"
+        - disabled: false
+          name: VersionId
+          value: "s3_version_id && s3_version_id !== '-' ? s3_version_id : undefined"
+        - disabled: false
+          name: HostId
+          value: "s3_host_id && s3_host_id !== '-' ? s3_host_id : undefined"
+        - disabled: false
+          name: SignatureVersion
+          value: "s3_sig_version && s3_sig_version !== '-' ? s3_sig_version : undefined"
+        - disabled: false
+          name: CipherSuite
+          value: "s3_cipher_suite && s3_cipher_suite !== '-' ? s3_cipher_suite : undefined"
+        - disabled: false
+          name: AuthenticationType
+          value: "s3_auth_type && s3_auth_type !== '-' ? s3_auth_type : undefined"
+        - disabled: false
+          name: HostHeader
+          value: "s3_host_header && s3_host_header !== '-' ? s3_host_header : undefined"
+        - disabled: false
+          name: TLSVersion
+          value: "s3_tls_version && s3_tls_version !== '-' ? s3_tls_version : undefined"
+        - disabled: false
+          name: AccessPointARN
+          value: "s3_access_point_arn && s3_access_point_arn !== '-' ? s3_access_point_arn : undefined"
+        - disabled: false
+          name: ACLRequired
+          value: "s3_acl_required && s3_acl_required !== '-' ? s3_acl_required : undefined"
+      remove:
+        - "s3_*"
+        - _raw
+        - _time
+        - source
+        - host
+        - index
+        - sourcetype
+        - cribl_*
+        - __*
+        - _path
+
+  - id: serde
+    filter: "true"
+    disabled: false
+    conf:
+      mode: reserialize
+      type: json
+      srcField: _raw
+      fields:
+        - TimeGenerated
+        - BucketOwner
+        - Bucket
+        - RemoteIp
+        - Requester
+        - RequestId
+        - Operation
+        - Key
+        - RequestUri
+        - HttpStatus
+        - ErrorCode
+        - BytesSent
+        - ObjectSize
+        - TotalTime
+        - TurnAroundTime
+        - Referer
+        - UserAgent
+        - VersionId
+        - HostId
+        - SignatureVersion
+        - CipherSuite
+        - AuthenticationType
+        - HostHeader
+        - TLSVersion
+        - AccessPointARN
+        - ACLRequired

@@ -1,0 +1,91 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "workspaceResourceId": {
+      "type": "string",
+      "metadata": {
+        "description": "The resource ID of the Log Analytics workspace where AWSSecurityHubFindings data will be sent."
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Azure region for the Data Collection Rule."
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Insights/dataCollectionRules",
+      "apiVersion": "2021-09-01-preview",
+      "name": "dcr-aws-securityhub",
+      "location": "[parameters('location')]",
+      "kind": "Direct",
+      "properties": {
+        "streamDeclarations": {
+          "Custom-AWSSecurityHubFindingsStream": {
+            "columns": [
+              { "name": "TimeGenerated", "type": "datetime" },
+              { "name": "AwsAccountId", "type": "string" },
+              { "name": "AwsRegion", "type": "string" },
+              { "name": "AwsSecurityFindingCreatedAt", "type": "datetime" },
+              { "name": "AwsSecurityFindingDescription", "type": "string" },
+              { "name": "AwsSecurityFindingFirstObservedAt", "type": "datetime" },
+              { "name": "AwsSecurityFindingGeneratorId", "type": "string" },
+              { "name": "AwsSecurityFindingId", "type": "string" },
+              { "name": "AwsSecurityFindingLastObservedAt", "type": "datetime" },
+              { "name": "AwsSecurityFindingProcessedAt", "type": "datetime" },
+              { "name": "AwsSecurityFindingProductArn", "type": "string" },
+              { "name": "AwsSecurityFindingProductFields", "type": "dynamic" },
+              { "name": "AwsSecurityFindingProductName", "type": "string" },
+              { "name": "AwsSecurityFindingSeverity", "type": "dynamic" },
+              { "name": "AwsSecurityFindingTitle", "type": "string" },
+              { "name": "AwsSecurityFindingTypes", "type": "dynamic" },
+              { "name": "AwsSecurityFindingUpdatedAt", "type": "datetime" },
+              { "name": "ComplianceAssociatedStandards", "type": "dynamic" },
+              { "name": "ComplianceRelatedRequirements", "type": "dynamic" },
+              { "name": "ComplianceSecurityControlId", "type": "string" },
+              { "name": "ComplianceSecurityControlParameters", "type": "dynamic" },
+              { "name": "ComplianceStatus", "type": "string" },
+              { "name": "ComplianceStatusReasons", "type": "dynamic" },
+              { "name": "RawData", "type": "dynamic" },
+              { "name": "RecordState", "type": "string" },
+              { "name": "Remediation", "type": "dynamic" },
+              { "name": "Resources", "type": "dynamic" },
+              { "name": "SchemaVersion", "type": "string" },
+              { "name": "WorkflowState", "type": "string" }
+            ]
+          }
+        },
+        "destinations": {
+          "logAnalytics": [
+            {
+              "workspaceResourceId": "[parameters('workspaceResourceId')]",
+              "name": "sentinel-workspace"
+            }
+          ]
+        },
+        "dataFlows": [
+          {
+            "streams": ["Custom-AWSSecurityHubFindingsStream"],
+            "destinations": ["sentinel-workspace"],
+            "outputStream": "Microsoft-AWSSecurityHubFindings",
+            "transformKql": "source"
+          }
+        ]
+      }
+    }
+  ],
+  "outputs": {
+    "dcrId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Insights/dataCollectionRules', 'dcr-aws-securityhub')]"
+    },
+    "dcrImmutableId": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Insights/dataCollectionRules', 'dcr-aws-securityhub')).immutableId]"
+    }
+  }
+}

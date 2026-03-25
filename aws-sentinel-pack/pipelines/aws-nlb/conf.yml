@@ -1,0 +1,145 @@
+output: default
+streamtags: []
+groups: {}
+asyncFuncTimeout: 1000
+functions:
+  - id: comment
+    filter: "true"
+    disabled: false
+    conf:
+      comment: >-
+        AWS NLB Access Logs → Microsoft Sentinel AWSNLBAccessLogs table.
+        Parses space-delimited NLB TLS access log entries (22 fields, no quoted fields).
+        All Sentinel columns are string type except TimeGenerated (datetime).
+        Note: TlsHandshakeTime uses mixed case (Tls not TLS) per Sentinel schema.
+
+  - id: regex_extract
+    filter: "true"
+    disabled: false
+    conf:
+      source: _raw
+      iterations: 100
+      overwrite: false
+      regex: >-
+        /^(?<nl_type>\S+)\s+(?<nl_version>\S+)\s+(?<nl_time>\S+)\s+(?<nl_elb>\S+)\s+(?<nl_listener>\S+)\s+(?<nl_client_port>\S+)\s+(?<nl_destination_port>\S+)\s+(?<nl_connection_time>\S+)\s+(?<nl_tls_handshake_time>\S+)\s+(?<nl_received_bytes>\S+)\s+(?<nl_sent_bytes>\S+)\s+(?<nl_incoming_tls_alert>\S+)\s+(?<nl_chosen_cert_arn>\S+)\s+(?<nl_chosen_cert_serial>\S+)\s+(?<nl_tls_cipher>\S+)\s+(?<nl_tls_protocol_version>\S+)\s+(?<nl_tls_named_group>\S+)\s+(?<nl_domain_name>\S+)\s+(?<nl_alpn_fe>\S+)\s+(?<nl_alpn_be>\S+)\s+(?<nl_alpn_client_pref>\S+)\s+(?<nl_tls_conn_creation_time>\S+)/
+
+  - id: drop
+    filter: "!nl_type || nl_type === '-'"
+    disabled: false
+    conf:
+      remove: []
+    description: Drop events that failed to parse
+
+  - id: eval
+    filter: "true"
+    disabled: false
+    conf:
+      add:
+        - disabled: false
+          name: TimeGenerated
+          value: "nl_time"
+        - disabled: false
+          name: NLBType
+          value: "nl_type && nl_type !== '-' ? nl_type : undefined"
+        - disabled: false
+          name: Version
+          value: "nl_version && nl_version !== '-' ? nl_version : undefined"
+        - disabled: false
+          name: Nlb
+          value: "nl_elb && nl_elb !== '-' ? nl_elb : undefined"
+        - disabled: false
+          name: Listener
+          value: "nl_listener && nl_listener !== '-' ? nl_listener : undefined"
+        - disabled: false
+          name: ClientIPPort
+          value: "nl_client_port && nl_client_port !== '-' ? nl_client_port : undefined"
+        - disabled: false
+          name: TargetIPPort
+          value: "nl_destination_port && nl_destination_port !== '-' ? nl_destination_port : undefined"
+        - disabled: false
+          name: ConnectionTime
+          value: "nl_connection_time && nl_connection_time !== '-' ? nl_connection_time : undefined"
+        - disabled: false
+          name: TlsHandshakeTime
+          value: "nl_tls_handshake_time && nl_tls_handshake_time !== '-' ? nl_tls_handshake_time : undefined"
+        - disabled: false
+          name: ReceivedBytes
+          value: "nl_received_bytes && nl_received_bytes !== '-' ? nl_received_bytes : undefined"
+        - disabled: false
+          name: SentBytes
+          value: "nl_sent_bytes && nl_sent_bytes !== '-' ? nl_sent_bytes : undefined"
+        - disabled: false
+          name: IncomingTLSAlert
+          value: "nl_incoming_tls_alert && nl_incoming_tls_alert !== '-' ? nl_incoming_tls_alert : undefined"
+        - disabled: false
+          name: ChosenCertArn
+          value: "nl_chosen_cert_arn && nl_chosen_cert_arn !== '-' ? nl_chosen_cert_arn : undefined"
+        - disabled: false
+          name: ChosenCertSerial
+          value: "nl_chosen_cert_serial && nl_chosen_cert_serial !== '-' ? nl_chosen_cert_serial : undefined"
+        - disabled: false
+          name: TLSCipher
+          value: "nl_tls_cipher && nl_tls_cipher !== '-' ? nl_tls_cipher : undefined"
+        - disabled: false
+          name: TLSProtocolVersion
+          value: "nl_tls_protocol_version && nl_tls_protocol_version !== '-' ? nl_tls_protocol_version : undefined"
+        - disabled: false
+          name: TLSNamedGroup
+          value: "nl_tls_named_group && nl_tls_named_group !== '-' ? nl_tls_named_group : undefined"
+        - disabled: false
+          name: DomainName
+          value: "nl_domain_name && nl_domain_name !== '-' ? nl_domain_name : undefined"
+        - disabled: false
+          name: ALPNFEProtocol
+          value: "nl_alpn_fe && nl_alpn_fe !== '-' ? nl_alpn_fe : undefined"
+        - disabled: false
+          name: ALPNBEProtocol
+          value: "nl_alpn_be && nl_alpn_be !== '-' ? nl_alpn_be : undefined"
+        - disabled: false
+          name: ALPNClientPrefList
+          value: "nl_alpn_client_pref && nl_alpn_client_pref !== '-' ? nl_alpn_client_pref : undefined"
+        - disabled: false
+          name: TLSConnectionCreationTime
+          value: "nl_tls_conn_creation_time && nl_tls_conn_creation_time !== '-' ? nl_tls_conn_creation_time : undefined"
+      remove:
+        - "nl_*"
+        - _raw
+        - _time
+        - source
+        - host
+        - index
+        - sourcetype
+        - cribl_*
+        - __*
+        - _path
+
+  - id: serde
+    filter: "true"
+    disabled: false
+    conf:
+      mode: reserialize
+      type: json
+      srcField: _raw
+      fields:
+        - TimeGenerated
+        - NLBType
+        - Version
+        - Nlb
+        - Listener
+        - ClientIPPort
+        - TargetIPPort
+        - ConnectionTime
+        - TlsHandshakeTime
+        - ReceivedBytes
+        - SentBytes
+        - IncomingTLSAlert
+        - ChosenCertArn
+        - ChosenCertSerial
+        - TLSCipher
+        - TLSProtocolVersion
+        - TLSNamedGroup
+        - DomainName
+        - ALPNFEProtocol
+        - ALPNBEProtocol
+        - ALPNClientPrefList
+        - TLSConnectionCreationTime

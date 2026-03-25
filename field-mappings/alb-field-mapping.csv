@@ -1,0 +1,39 @@
+AWS Field,Position,Sentinel Column,Sentinel Type,Notes
+type,1,ALBType,string,"Request type: http, https, h2, grpcs, ws, wss"
+time,2,TimeGenerated,datetime,ISO 8601 format from ALB - use directly
+elb,3,Alb,string,Resource ID of the ALB (forward slashes replaced with periods)
+client:port,4,ClientIp,string,Split on last colon - IP portion only
+client:port,4,ClientPort,int,Split on last colon - port portion only
+target:port,5,TargetIp,string,Split on last colon - IP portion; dash if no target
+target:port,5,TargetPort,int,Split on last colon - port portion; -1 if no target
+request_processing_time,6,RequestProcessingTime,string,Seconds with millisecond precision; -1 if error
+target_processing_time,7,TargetProcessingTime,string,Seconds with millisecond precision; -1 if error
+response_processing_time,8,ResponseProcessingTime,string,Seconds with millisecond precision; -1 if error
+elb_status_code,9,ElbStatusCode,int,HTTP status code from load balancer
+target_status_code,10,TargetStatusCode,string,HTTP status code from target; dash if no response
+received_bytes,11,ReceivedBytes,long,Bytes received from client
+sent_bytes,12,SentBytes,long,Bytes sent to client
+request_line,13,RequestRaw,string,"Quoted field: ""METHOD URL PROTOCOL"" e.g. ""GET https://example.com HTTP/1.1"""
+user_agent,14,UserAgent,string,Quoted field: user agent string
+ssl_cipher,15,SslCipher,string,SSL cipher; dash if not SSL
+ssl_protocol,16,SslProtocol,string,SSL protocol; dash if not SSL
+target_group_arn,17,TargetGroupArn,string,ARN of the target group
+trace_id,18,TraceId,string,Quoted field: X-Amzn-Trace-Id header content
+domain_name,19,DomainName,string,Quoted field: SNI domain name during TLS handshake
+chosen_cert_arn,20,ChosenCertArn,string,Quoted field: certificate ARN presented to client
+matched_rule_priority,21,MatchedRulePriority,string,Priority value of the rule that matched
+request_creation_time,22,RequestCreationTime,string,ISO 8601 time when ALB received the request
+actions_executed,23,ActionsExecuted,string,"Quoted field: comma-separated actions (forward, fixed-response, redirect, etc.)"
+redirect_url,24,RedirectUrl,string,Quoted field: URL of redirect target
+error_reason,25,LambdaErrorReason,string,Quoted field: error reason code for Lambda targets
+target:port_list,26,TargetPortList,string,Quoted field: space-delimited list of target ip:port pairs
+target_status_code_list,27,TargetStatusCodeList,string,Quoted field: space-delimited list of status codes from targets
+classification,28,Classification,string,Quoted field: classification of desync mitigation
+classification_reason,29,ClassificationReason,string,Quoted field: classification reason code
+conn_trace_id,30,ConnTraceId,string,Connection trace ID for tracking connection-level events
+---,---,---,---,System columns (auto-populated by Sentinel)
+N/A,N/A,_BilledSize,real,System: record size in bytes
+N/A,N/A,_IsBillable,string,System: billing flag
+N/A,N/A,SourceSystem,string,System: source system identifier
+N/A,N/A,TenantId,string,System: workspace tenant ID
+N/A,N/A,Type,string,System: table name (AWSALBAccessLogs)

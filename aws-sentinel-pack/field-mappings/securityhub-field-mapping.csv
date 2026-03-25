@@ -1,0 +1,36 @@
+ASFF Field,Sentinel Column,Sentinel Type,Notes
+AwsAccountId,AwsAccountId,string,The AWS account ID from the finding
+Region,AwsRegion,string,AWS region where the finding occurred
+CreatedAt,AwsSecurityFindingCreatedAt,datetime,ISO 8601 timestamp when finding was created
+Description,AwsSecurityFindingDescription,string,Detailed description of the finding
+FirstObservedAt,AwsSecurityFindingFirstObservedAt,datetime,ISO 8601 timestamp when first observed
+GeneratorId,AwsSecurityFindingGeneratorId,string,ID of the generator that created the finding
+Id,AwsSecurityFindingId,string,Unique identifier for the finding
+LastObservedAt,AwsSecurityFindingLastObservedAt,datetime,ISO 8601 timestamp when last observed
+ProcessedAt,AwsSecurityFindingProcessedAt,datetime,ISO 8601 timestamp when processed by Security Hub
+ProductArn,AwsSecurityFindingProductArn,string,ARN of the product that generated the finding
+ProductFields,AwsSecurityFindingProductFields,dynamic,Additional product-specific fields (JSON object)
+ProductName,AwsSecurityFindingProductName,string,Name of the product that generated the finding
+Severity,AwsSecurityFindingSeverity,dynamic,"Severity object with Label, Normalized, Original, Product fields"
+Title,AwsSecurityFindingTitle,string,Title of the finding
+Types,AwsSecurityFindingTypes,dynamic,Array of finding type strings
+UpdatedAt,AwsSecurityFindingUpdatedAt,datetime,ISO 8601 timestamp when finding was last updated
+Compliance.AssociatedStandards,ComplianceAssociatedStandards,dynamic,Array of compliance standards objects
+Compliance.RelatedRequirements,ComplianceRelatedRequirements,dynamic,Array of related compliance requirement strings
+Compliance.SecurityControlId,ComplianceSecurityControlId,string,Security control identifier
+Compliance.SecurityControlParameters,ComplianceSecurityControlParameters,dynamic,Array of security control parameter objects
+Compliance.Status,ComplianceStatus,string,"PASSED, WARNING, FAILED, NOT_AVAILABLE"
+Compliance.StatusReasons,ComplianceStatusReasons,dynamic,Array of status reason objects
+(raw event),RawData,dynamic,Full original ASFF JSON finding preserved as dynamic
+RecordState,RecordState,string,"ACTIVE or ARCHIVED"
+Remediation,Remediation,dynamic,"Remediation object with Recommendation (Text, Url)"
+Resources,Resources,dynamic,Array of resource objects affected by finding
+SchemaVersion,SchemaVersion,string,ASFF schema version (e.g. 2018-10-08)
+Workflow.State / Workflow.Status,WorkflowState,string,"NEW, NOTIFIED, RESOLVED, SUPPRESSED"
+---,---,---,System columns (auto-populated by Sentinel)
+N/A,TimeGenerated,datetime,Set from UpdatedAt or CreatedAt or current time
+N/A,_BilledSize,real,System: record size in bytes
+N/A,_IsBillable,string,System: billing flag
+N/A,SourceSystem,string,System: source system identifier
+N/A,TenantId,string,System: workspace tenant ID
+N/A,Type,string,System: table name (AWSSecurityHubFindings)

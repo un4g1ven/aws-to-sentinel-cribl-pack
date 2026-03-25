@@ -1,0 +1,217 @@
+output: default
+streamtags: []
+groups: {}
+asyncFuncTimeout: 1000
+functions:
+  - id: comment
+    filter: "true"
+    disabled: false
+    conf:
+      comment: >-
+        AWS Security Hub Findings (ASFF) → Microsoft Sentinel AWSSecurityHubFindings table.
+        Input is JSON (ASFF format). Maps top-level ASFF fields to Sentinel PascalCase columns.
+        Nested objects (Severity, ProductFields, Resources, Compliance, Remediation, Types)
+        are preserved as dynamic (JSON) types.
+        TimeGenerated derived from UpdatedAt → CreatedAt → current time.
+
+  - id: serde
+    filter: "true"
+    disabled: false
+    conf:
+      mode: extract
+      type: json
+      srcField: _raw
+
+  - id: drop
+    filter: "!Id && !AwsAccountId"
+    disabled: false
+    conf:
+      remove: []
+    description: Drop events that failed to parse or lack required ASFF fields
+
+  - id: eval
+    filter: "true"
+    disabled: false
+    conf:
+      add:
+        - disabled: false
+          name: TimeGenerated
+          value: "UpdatedAt || CreatedAt || new Date().toISOString()"
+        - disabled: false
+          name: AwsAccountId
+          value: "AwsAccountId || undefined"
+        - disabled: false
+          name: AwsRegion
+          value: "Region || undefined"
+        - disabled: false
+          name: AwsSecurityFindingCreatedAt
+          value: "CreatedAt || undefined"
+        - disabled: false
+          name: AwsSecurityFindingDescription
+          value: "Description || undefined"
+        - disabled: false
+          name: AwsSecurityFindingFirstObservedAt
+          value: "FirstObservedAt || undefined"
+        - disabled: false
+          name: AwsSecurityFindingGeneratorId
+          value: "GeneratorId || undefined"
+        - disabled: false
+          name: AwsSecurityFindingId
+          value: "Id || undefined"
+        - disabled: false
+          name: AwsSecurityFindingLastObservedAt
+          value: "LastObservedAt || undefined"
+        - disabled: false
+          name: AwsSecurityFindingProcessedAt
+          value: "ProcessedAt || undefined"
+        - disabled: false
+          name: AwsSecurityFindingProductArn
+          value: "ProductArn || undefined"
+        - disabled: false
+          name: AwsSecurityFindingProductFields
+          value: "ProductFields || undefined"
+        - disabled: false
+          name: AwsSecurityFindingProductName
+          value: "ProductName || undefined"
+        - disabled: false
+          name: AwsSecurityFindingSeverity
+          value: "Severity || undefined"
+        - disabled: false
+          name: AwsSecurityFindingTitle
+          value: "Title || undefined"
+        - disabled: false
+          name: AwsSecurityFindingTypes
+          value: "Types || undefined"
+        - disabled: false
+          name: AwsSecurityFindingUpdatedAt
+          value: "UpdatedAt || undefined"
+        - disabled: false
+          name: ComplianceAssociatedStandards
+          value: "Compliance ? Compliance.AssociatedStandards : undefined"
+        - disabled: false
+          name: ComplianceRelatedRequirements
+          value: "Compliance ? Compliance.RelatedRequirements : undefined"
+        - disabled: false
+          name: ComplianceSecurityControlId
+          value: "Compliance ? Compliance.SecurityControlId : undefined"
+        - disabled: false
+          name: ComplianceSecurityControlParameters
+          value: "Compliance ? Compliance.SecurityControlParameters : undefined"
+        - disabled: false
+          name: ComplianceStatus
+          value: "Compliance ? Compliance.Status : undefined"
+        - disabled: false
+          name: ComplianceStatusReasons
+          value: "Compliance ? Compliance.StatusReasons : undefined"
+        - disabled: false
+          name: RawData
+          value: "JSON.parse(_raw)"
+        - disabled: false
+          name: __sentinelRecordState
+          value: "RecUstate || undefined"
+        - disabled: false
+          name: __sentinelRemediation
+          value: "Remediation || undefined"
+        - disabled: false
+          name: __sentinelResources
+          value: "ResU �$urces || undefined"
+        - disabled: false
+          name: __sentinelSchemaVersion
+          value: "SchemaVersion || undefined"
+        - disabled: false
+          name: __sentinelWorkflowState
+          value: "WorkflowState || (Workflow ? Workflow.Status : undefined)"
+      remove:
+        - Id
+        - Region
+        - CreatedAt
+        - Description
+        - FirstObservedAt
+        - GeneratorId
+        - LastObservedAt
+        - ProcessedAt
+        - ProductArn
+        - ProductFields
+        - ProductName
+        - Severity
+        - Title
+        - Types
+        - UpdatedAt
+        - Compliance
+        - RecordState
+        - Remediation
+        - Resources
+        - SchemaVersion
+        - WorkflowState
+        - Workflow
+        - CompanyName
+        - _raw
+        - _time
+        - source
+        - host
+        - index
+        - sourcetype
+        - cribl_*
+        - __*"
+        - _path
+
+  - id: eval
+    filter: "true"
+    disabled: false
+    conf:
+      add:
+        - disabled: false
+          name: RecordState
+          value: "__sentinelRecordState"
+        - disabled: false
+          name: Remediation
+          value: "__sentinelRemediation"
+        - disabled: false
+          name: Resources
+          value: "__sentinelResources"
+        - disabled: false
+          name: SchemaVersion
+          value: "__sentinelSchemaVersion"
+        - disabled: false
+          name: WorkflowState
+          value: "__sentinelWorkflowState"
+      remove:
+        - "__sentinel"
+
+  - id: serde
+    filter: "true"
+    disabled: false
+    conf:
+      mode: reserialize
+      type: json
+      srcField: _raw
+      fields:
+        - TimeGenerated
+        - AwsAccountId
+        - AwsRegion
+        - AwsSecurityFindingCreatedAt
+        - AwsSecurityFindingDescription
+        - AwsSecurityFindingFirstObservedAt
+        - AwsSecurityFindingGeneratorId
+        - AwsSecurityFindingId
+        - AwsSecurityFindingLastObservedAt
+        - AwsSecurityFindingProcessedAt
+        - AwsSecurityFindingProductArn
+        - AwsSecurityFindingProductFields
+        - AwsSecurityFindingProductName
+        - AwsSecurityFindingSeverity
+        - AwsSecurityFindingTitle
+        - AwsSecurityFindingTypes
+        - AwsSecurityFindingUpdatedAt
+        - ComplianceAssociatedStandards
+        - ComplianceRelatedRequirements
+        - ComplianceSecurityControlId
+        - ComplianceSecurityControlParameters
+        - ComplianceStatus
+        - ComplianceStatusReasons
+        - RawData
+        - RecordState
+        - Remediation
+        - Resources
+        - SchemaVersion
+        - WorkflowState

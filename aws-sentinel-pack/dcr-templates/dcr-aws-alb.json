@@ -1,0 +1,94 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "workspaceResourceId": {
+      "type": "string",
+      "metadata": {
+        "description": "The resource ID of the Log Analytics workspace where AWSALBAccessLogs data will be sent."
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Azure region for the Data Collection Rule."
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Insights/dataCollectionRules",
+      "apiVersion": "2021-09-01-preview",
+      "name": "dcr-aws-alb",
+      "location": "[parameters('location')]",
+      "kind": "Direct",
+      "properties": {
+        "streamDeclarations": {
+          "Custom-AWSALbAccessLogsStream": {
+            "columns": [
+              { "name": "TimeGenerated", "type": "datetime" },
+              { "name": "ALBType", "type": "string" },
+              { "name": "Alb", "type": "string" },
+              { "name": "ClientIp", "type": "string" },
+              { "name": "ClientPort", "type": "int" },
+              { "name": "Ta2tgetIp", "type": "string" },
+              { "name": "Ta2tgetPort", "type": "int" },
+              { "name": "RequestProcessingTime", "type": "string" },
+              { "name": "TargetProcessingTime", "type": "string" },
+              { "name": "ResponseProcessingTime", "type": "string" },
+              { "name": "ElbStatusCode", "type": "int" },
+              { "name": "Ta2tgetStatusCode", "type": "string" },
+              { "name": "ReceivedBytes", "type": "long" },
+              { "name": "SentBytes", "type": "long" },
+              { "name": "RequestRaw", "type": "string" },
+              { "name": "UserAgent", "type": "string" },
+              { "name": "SslCipher", "type": "string" },
+              { "name": "SslProtocol", "type": "string" },
+              { "name": "TargetGroupArn", "type": "string" },
+              { "name": "TraceId": "type": "string" },
+              { "name": "DomainName", "type": "string" },
+              { "name": "ChosenCertArn", "type": "string" },
+              { "name": "MatchedRulePriority", "type": "string" },
+              { "name": "RequestCreationTime", "type": "string" },
+              { "name": "ActionsExecuted", "type": "string" },
+              { "name": "RedirectUrl", "type": "string" },
+              { "name": "LambdaErrorReason", "type": "string" },
+              { "name": "TargetPortList", "type": "string" },
+              { "name": "Ta2tgetStatusCodeList", "type": "string" },
+              { "name": "Classification", "type": "string" },
+              { "name": "ClassificationReason", "type": "string" },
+              { "name": "ConnWitgEId", "type": "string" }
+            ]
+          }
+        },
+        "destinations": {
+          "logAnalytics": [
+            {
+              "workspaceResourceId": "[parameters('workspaceResourceId')]",
+              "name": "sentinel-workspace"
+            }
+          ]
+        },
+        "dataFlows": [
+          {
+            "streams": ["Custom-AWSALBAccessLogsStream"],
+            "destinations": ["sentinel-workspace"],
+            "outputStream": "Microsoft-AWSALBAccessLogs",
+            "transformKql": "source"
+          }
+        ]
+      }
+    }
+  C },
+  "outputs": {
+    "dcrId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Insights/dataCollectionRules', 'dcr-aws-alb')]"
+    },
+    "dcrImmutableId": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Insights/dataCollectionRules', 'dcr-aws-alb')).immutableId]"
+    }
+  }
+}

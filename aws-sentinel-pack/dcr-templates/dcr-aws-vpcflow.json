@@ -1,0 +1,113 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "dataCollectionRuleName": {
+      "type": "string",
+      "defaultValue": "dcr-aws-vpcflow",
+      "metadata": {
+        "description": "Name of the Data Collection Rule for AWS VPC Flow Logs."
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Azure region for the DCR resource."
+      }
+    },
+    "workspaceResourceId": {
+      "type": "string",
+      "metadata": {
+        "description": "Full ARM resource ID of the Log Analytics workspace backing Microsoft Sentinel."
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Insights/dataCollectionRules",
+      "apiVersion": "2021-09-01-preview",
+      "name": "[parameters('dataCollectionRuleName')]",
+      "location": "[parameters('location')]",
+      "kind": "Direct",
+      "properties": {
+        "streamDeclarations": {
+          "Custom-AWSVPCFlowStream": {
+            "columns": [
+              { "name": "AccountId",                  "type": "string"   },
+              { "name": "Action",                     "type": "string"   },
+              { "name": "AzId",                       "type": "string"   },
+              { "name": "Bytes",                      "type": "long"     },
+              { "name": "DstAddr",                    "type": "string"   },
+              { "name": "DstPort",                    "type": "int"      },
+              { "name": "EcsClusterArn",              "type": "string"   },
+              { "name": "EcsClusterName",             "type": "string"   },
+              { "name": "EcsContainerId",             "type": "string"   },
+              { "name": "EcsContainerInstanceArn",    "type": "string"   },
+              { "name": "EcsContainerInstanceId",     "type": "string"   },
+              { "name": "EcsSecondContainerId",       "type": "string"   },
+              { "name": "EcsServiceName",             "type": "string"   },
+              { "name": "EcsTaskArn",                 "type": "string"   },
+              { "name": "EcsTaskDefinitionArn",       "type": "string"   },
+              { "name": "EcsTaskId",                  "type": "string"   },
+              { "name": "End",                        "type": "datetime" },
+              { "name": "FlowDirection",              "type": "string"   },
+              { "name": "InstanceId",                 "type": "string"   },
+              { "name": "InterfaceId",                "type": "string"   },
+              { "name": "LogStatus",                  "type": "string"   },
+              { "name": "Packets",                    "type": "int"      },
+              { "name": "PktDstAddr",                 "type": "string"   },
+              { "name": "PktDstAwsService",           "type": "string"   },
+              { "name": "PktSrcAddr",                 "type": "string"   },
+              { "name": "PktSrcAwsService",           "type": "string"   },
+              { "name": "Protocol",                   "type": "int"      },
+              { "name": "Region",                     "type": "string"   },
+              { "name": "SrcAddr",                    "type": "string"   },
+              { "name": "SrcPort",                    "type": "int"      },
+              { "name": "Start",                      "type": "datetime" },
+              { "name": "SublocationId",              "type": "string"   },
+              { "name": "SublocationType",            "type": "string"   },
+              { "name": "SubnetId",                   "type": "string"   },
+              { "name": "TcpFlags",                   "type": "int"      },
+              { "name": "TimeGenerated",              "type": "datetime" },
+              { "name": "TrafficPath",                "type": "string"   },
+              { "name": "TrafficType",                "type": "string"   },
+              { "name": "Version",                    "type": "int"      },
+              { "name": "VpcId",                      "type": "string"   }
+            ]
+          }
+        },
+        "destinations": {
+          "logAnalytics": [
+            {
+              "workspaceResourceId": "[parameters('workspaceResourceId')]",
+              "name": "sentinel-workspace"
+            }
+          ]
+        },
+        "dataFlows": [
+          {
+            "streams": [ "Custom-AWSVPCFlowStream" ],
+            "destinations": [ "sentinel-workspace" ],
+            "outputStream": "Microsoft-AWSVPCFlow",
+            "transformKql": "source"
+          }
+        ]
+      }
+    }
+  ],
+  "outputs": {
+    "dataCollectionRuleId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Insights/dataCollectionRules', parameters('dataCollectionRuleName'))]"
+    },
+    "immutableId": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Insights/dataCollectionRules', parameters('dataCollectionRuleName'))).immutableId]"
+    },
+    "streamName": {
+      "type": "string",
+      "value": "Custom-AWSVPCFlowStream"
+    }
+  }
+}

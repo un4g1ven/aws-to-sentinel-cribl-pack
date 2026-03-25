@@ -1,0 +1,129 @@
+output: default
+streamtags: []
+groups: {}
+asyncFuncTimeout: 1000
+functions:
+  # ─────────────────────────────────────────────────────────────
+  # Step 1: Comment — Pipeline overview
+  # ─────────────────────────────────────────────────────────────
+  - id: comment
+    filter: "true"
+    disabled: false
+    conf:
+      comment: >-
+        AWS GuardDuty Findings → Microsoft Sentinel (AWSGuardDuty table).
+        Transforms GuardDuty JSON findings into the native AWSGuardDuty
+        schema for ingestion via the Azure Monitor Logs Ingestion API (DCR).
+        GuardDuty findings arrive as JSON objects with nested resource and
+        service objects that map to dynamic columns in Sentinel.
+        Schema ref: https://learn.microsoft.com/en-us/azure/azure-monitor/reference/tables/awsguardduty
+
+  # ─────────────────────────────────────────────────────────────
+  # Step 2: Parse — Extract JSON from _raw if not already parsed
+  # GuardDuty findings from S3 are JSON. If the event arrives as
+  # a raw string, parse it into structured fields.
+  # ─────────────────────────────────────────────────────────────
+  - id: serde
+    filter: "true"
+    disabled: false
+    conf:
+      mode: extract
+      type: json
+      srcField: _raw
+
+  # ─────────────────────────────────────────────────────────────
+  # Step 3: Eval ― Map GuardDuty fields to Sentinel AWSGuardDuty schema
+  # Maps top-level fields directly. The resource and service objects
+  # are preserved as dynamic (JSON) columns in Sentinel.
+  # Severity is converted from float to integer.
+  # ─────────────────────────────────────────────────────────────
+  - id: eval
+    filter: "true"
+    disabled: false
+    conf:
+      add:
+        # ── TimeGenerated (mandatory) — use updatedAt, fall back to createdAt ──
+        - name: TimeGenerated
+          value: "updatedAt ? new Date(updatedAt).toISOString() : (createdAt ? new Date(createdAt).toISOString() : new Date().toISOString())"
+
+        # ── TimeCreated — when the finding was first observed ──
+        - name: TimeCreated
+          value: "createdAt ? new Date(createdAt).toISOString() : undefined"
+
+        # ── String fields (direct mapping) ──
+        - name: AccountId
+          value: "accountId || undefined"
+        - name: ActivityType
+          value: "type || undefined"
+        - name: Arn
+          value: "arn || undefined"
+        - name: Description
+          value: "description || undefined"
+        - name: Id
+          value: "id || undefined"
+        - name: Partition
+          value: "partition || undefined"
+        - name: Region
+          value: "region || undefined"
+        - name: SchemaVersion
+          value: "schemaVersion || undefined"
+        - name: Title
+          value: "title || undefined"
+
+        # ── Severity (float → integer) ──
+        - name: Severity
+          value: "severity != null ? Math.round(Number(severity)) : undefined"
+
+        # ── Dynamic fields — nested objects preserved as JSON ──
+        - name: ResourceDetails
+          value: "resource ? JSON.stringify(resource) : undefined"
+        - name: ServiceDetails
+          value: "service ? JSON.stringify(service) : undefined"
+
+  # ─────────────────────────────────────────────────────────────
+  # Step 4: Eval (cleanup) ― Remove original/unmapped fields
+  # Strip all original GuardDuty fields plus Cribl internals
+  # to ensure only Sentinel-aligned columns remain.
+  # ─────────────────────────────────────────────────────────────
+  - id: eval
+    filter: "true"
+    disabled: false
+    conf:
+      remove:
+        - accountId
+        - arn
+        - createdAt
+        - description
+        - id
+        - partition
+        - region
+        - resource
+        - schemaVersion
+        - service
+        - severity
+        - title
+        - type
+        - updatedAt
+        - _raw
+        - _time
+        - cribl_*
+        - __inputId
+        - __outputId
+        - source
+        - sourcetype
+        - host
+        - index
+        - _path
+        - cribl_pipe
+
+  # ─────────────────────────────────────────────────────────────
+  # Step 5: Serialize ― Output as JSON for the Logs Ingestion API
+  # ─────────────────────────────────────────────────────────────
+  - id: serde
+    filter: "true"
+    disabled: false
+    conf:
+      mode: reserialize
+      type: json
+      srcField: _raw
+      fieldFilterExpr: "!/^_/i.test(fieldName) && !/^cribl_/i.test(fieldName)"

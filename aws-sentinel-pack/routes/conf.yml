@@ -1,0 +1,164 @@
+id: aws-sentinel-routes
+groups: {}
+routes:
+  # ── CloudTrail ──
+  - id: route-aws-cloudtrail
+    name: AWS CloudTrail
+    final: true
+    disabled: false
+    pipeline: aws-cloudtrail
+    description: >-
+      Route CloudTrail events to the aws-cloudtrail pipeline.
+      Matches on S3 source input ID or path containing CloudTrail indicators.
+    filter: >-
+      __inputId.startsWith('s3:cloudtrail') ||
+      __inputId.startsWith('s3:aws-cloudtrail') ||
+      (_path && _path.includes('CloudTrail')) ||
+      (_path && _path.includes('cloudtrail')) ||
+      (source && source.includes('CloudTrail')) ||
+      (Records && Records[0] && Records[0].eventVersion != undefined && Records[0].eventSource != undefined)
+    output: default
+
+  # ── VPC Flow Logs ──
+  - id: route-aws-vpcflow
+    name: AWS VPC Flow Logs
+    final: true
+    disabled: false
+    pipeline: aws-vpcflow
+    description: >-
+      Route VPC Flow Log events to the aws-vpcflow pipeline.
+      Matches on S3 source input ID or path containing VPC flow log indicators.
+    filter: >-
+      __inputId.startsWith('s3:vpcflow') ||
+      __inputId.startsWith('s3:aws-vpcflow') ||
+      (_path && _path.includes('vpcflowlogs')) ||
+      (_path && _path.includes('VPCFlowLogs')) ||
+      (_path && _path.includes('vpc-flow-logs')) ||
+      (source && source.includes('vpcflowlogs'))
+    output: default
+
+  # ── GuardDuty ──
+  - id: route-aws-guardduty
+    name: AWS GuardDuty
+    final: true
+    disabled: false
+    pipeline: aws-guardduty
+    description: >-
+      Route GuardDuty findings to the aws-guardduty pipeline.
+      Matches on S3 source input ID or path containing GuardDuty indicators,
+      or JSON structure with GuardDuty-specific fields.
+    filter: >-
+      __inputId.startsWith('s3:guardduty') ||
+      __inputId.startsWith('s3:aws-guardduty') ||
+      (_path && _path.includes('GuardDuty')) ||
+      (_path && _path.includes('guardduty')) ||
+      (source && source.includes('GuardDuty')) ||
+      (service && service.serviceName === 'guardduty')
+    output: default
+
+  # ── WAF ──
+  - id: route-aws-waf
+    name: AWS WAF
+    final: true
+    disabled: false
+    pipeline: aws-waf
+    description: >-
+      Route WAF log events to the aws-waf pipeline.
+      Matches on S3 source input ID or path containing WAF indicators,
+      or JSON structure with WAF-specific fields (webaclId, terminatingRuleId).
+    filter: >-
+      __inputId.startsWith('s3:waf') ||
+      __inputId.startsWith('s3:aws-waf') ||
+      (_path && _path.includes('WAFLogs')) ||
+      (_path && _path.includes('aws-waf-logs')) ||
+      (source && source.includes('WAFLogs')) ||
+      (webaclId != undefined && terminatingRuleId != undefined)
+    output: default
+
+  # ── Route53 Resolver ──
+  - id: route-aws-route53
+    name: AWS Route53 Resolver
+    final: true
+    disabled: false
+    pipeline: aws-route53
+    description: >-
+      Route Route53 Resolver query logs to the aws-route53 pipeline.
+      Matches on S3 source input ID or path containing Route53 indicators,
+      or JSON structure with Route53-specific fields (query_name, query_type).
+    filter: >-
+      __inputId.startsWith('s3:route53') ||
+      __inputId.startsWith('s3:aws-route53') ||
+      (_path && _path.includes('route53')) ||
+      (_path && _path.includes('Route53')) ||
+      (source && source.includes('route53')) ||
+      (query_name != undefined && query_type != undefined && srcaddr != undefined)
+    output: default
+
+  # ── ALB Access Logs ──
+  - id: route-aws-alb
+    name: AWS ALB Access Logs
+    final: true
+    disabled: false
+    pipeline: aws-alb
+    description: >-
+      Route ALB access log events to the aws-alb pipeline.
+      Matches on S3 path containing elasticloadbalancing/app or ALB-specific input ID.
+    filter: >-
+      __inputId.startsWith('s3:alb') ||
+      __inputId.startsWith('s3:aws-alb') ||
+      (_path && _path.includes('elasticloadbalancing') && _path.includes('/app.')) ||
+      (source && source.includes('elasticloadbalancing') && source.includes('/app.'))
+    output: default
+
+  # ── NLB Access Logs ──
+  - id: route-aws-nlb
+    name: AWS NLB Access Logs
+    final: true
+    disabled: false
+    pipeline: aws-nlb
+    description: >-
+      Route NLB access log events to the aws-nlb pipeline.
+      Matches on S3 path containing elasticloadbalancing/net or NLB-specific input ID.
+    filter: >-
+      __inputId.startsWith('s3:nlb') ||
+      __inputId.startsWith('s3:aws-nlb') ||
+      (_path && _path.includes('elasticloadbalancing') && _path.includes('/net.')) ||
+      (source && source.includes('elasticloadbalancing') && source.includes('/net.'))
+    output: default
+
+  # ── S3 Server Access Logs ──
+  - id: route-aws-s3access
+    name: AWS S3 Server Access Logs
+    final: true
+    disabled: false
+    pipeline: aws-s3access
+    description: >-
+      Route S3 server access log events to the aws-s3access pipeline.
+      Matches on S3 source input ID or path containing S3 access log indicators.
+    filter: >-
+      __inputId.startsWith('s3:s3access') ||
+      __inputId.startsWith('s3:aws-s3access') ||
+      (_path && _path.includes('s3-access')) ||
+      (_path && _path.includes('s3accesslogs')) ||
+      (_path && _path.includes('S3AccessLogs')) ||
+      (source && source.includes('s3-access'))
+    output: default
+
+  # ── Security Hub Findings ──
+  - id: route-aws-securityhub
+    name: AWS Security Hub Findings
+    final: true
+    disabled: false
+    pipeline: aws-securityhub
+    description: >-
+      Route Security Hub ASFF findings to the aws-securityhub pipeline.
+      Matches on S3 source input ID, path containing SecurityHub,
+      or ASFF-specific JSON fields (ProductArn, SchemaVersion, GeneratorId).
+    filter: >-
+      __inputId.startsWith('s3:securityhub') ||
+      __inputId.startsWith('s3:aws-securityhub') ||
+      (_path && _path.includes('SecurityHub')) ||
+      (_path && _path.includes('securityhub')) ||
+      (source && source.includes('SecurityHub')) ||
+      (ProductArn != undefined && SchemaVersion != undefined && GeneratorId != undefined)
+    output: default

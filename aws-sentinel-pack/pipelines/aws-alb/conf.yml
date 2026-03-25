@@ -1,0 +1,186 @@
+output: default
+streamtags: []
+groups: {}
+asyncFuncTimeout: 1000
+functions:
+  - id: comment
+    filter: "true"
+    disabled: false
+    conf:
+      comment: >-
+        AWS ALB Access Logs → Microsoft Sentinel AWSALBAccessLogs table.
+        Parses space-delimited ALB access log entries (with quoted fields),
+        maps to Sentinel native schema using exact PascalCase column names.
+        Fields 1-29 are standard; field 30 (conn_trace_id) is optional.
+        Fields 31-33 (transformed_host/uri/status) not in Sentinel schema - dropped.
+
+  - id: regex_extract
+    filter: "true"
+    disabled: false
+    conf:
+      source: _raw
+      iterations: 100
+      overwrite: false
+      regex: >-
+        /^(?<al_type>\S+)\s+(?<al_time>\S+)\s+(?<al_elb>\S+)\s+(?<al_client_port>\S+)\s+(?<al_target_port>\S+)\s+(?<al_request_processing_time>\S+)\s+(?<al_target_processing_time>\S+)\s+(?<al_response_processing_time>\S+)\s+(?<al_elb_status_code>\S+)\s+(?<al_target_status_code>\S+)\s+(?<al_received_bytes>\S+)\s+(?<al_sent_bytes>\S+)\s+"(?<al_request>[^"]*)"\s+"(?<al_user_agent>[^"]*)"\s+(?<al_ssl_cipher>\S+)\s+(?<al_ssl_protocol>\S+)\s+(?<al_target_group_arn>\S+)\s+"(?<al_trace_id>[^"]*)"\s+"(?<al_domain_name>[^"]*)"\s+"(?<al_chosen_cert_arn>[^"]*)"\s+(?<al_matched_rule_priority>\S+)\s+(?<al_request_creation_time>\S+)\s+"(?<al_actions_executed>[^"]*)"\s+"(?<al_redirect_url>[^"]*)"\s+"(?<al_error_reason>[^"]*)"\s+"(?<al_target_port_list>[^"]*)"\s+"(?<al_target_status_code_list>[^"]*)"\s+"(?<al_classification>[^"]*)"\s+"(?<al_classification_reason>[^"]*)"(?:\s+(?<al_conn_trace_id>\S+))?/
+
+  - id: drop
+    filter: "!al_type || al_type === '-'"
+    disabled: false
+    conf:
+      remove: []
+    description: Drop events that failed to parse (no type field extracted)
+
+  - id: eval
+    filter: "true"
+    disabled: false
+    conf:
+      add:
+        - disabled: false
+          name: TimeGenerated
+          value: "al_time"
+        - disabled: false
+          name: ALBType
+          value: "al_type"
+        - disabled: false
+          name: Alb
+          value: "al_elb"
+        - disabled: false
+          name: ClientIp
+          value: "al_client_port ? al_client_port.substring(0, al_client_port.lastIndexOf(':')) : undefined"
+        - disabled: false
+          name: ClientPort
+          value: "al_client_port ? Number(al_client_port.substring(al_client_port.lastIndexOf(':') + 1)) : undefined"
+        - disabled: false
+          name: TargetIp
+          value: "al_target_port && al_target_port !== '-' ? al_target_port.substring(0, al_target_port.lastIndexOf(':')) : undefined"
+        - disabled: false
+          name: TargetPort
+          value: "al_target_port && al_target_port !== '-' ? Number(al_target_port.substring(al_target_port.lastIndexOf(':') + 1)) : undefined"
+        - disabled: false
+          name: RequestProcessingTime
+          value: "al_request_processing_time && al_request_processing_time !== '-' ? al_request_processing_time : undefined"
+        - disabled: false
+          name: TargetProcessingTime
+          value: "al_target_processing_time && al_target_processing_time !== '-' ? al_target_processing_time : undefined"
+        - disabled: false
+          name: ResponseProcessingTime
+          value: "al_response_processing_time && al_response_processing_time !== '-' ? al_response_processing_time : undefined"
+        - disabled: false
+          name: ElbStatusCode
+          value: "al_elb_status_code && al_elb_status_code !== '-' ? Number(al_elb_status_code) : undefined"
+        - disabled: false
+          name: TargetStatusCode
+          value: "al_target_status_code && al_target_status_code !== '-' ? al_target_status_code : undefined"
+        - disabled: false
+          name: ReceivedBytes
+          value: "al_received_bytes && al_received_bytes !== '-' ? Number(al_received_bytes) : undefined"
+        - disabled: false
+          name: SentBytes
+          value: "al_sent_bytes && al_sent_bytes !== '-' ? Number(al_sent_bytes) : undefined"
+        - disabled: false
+          name: RequestRaw
+          value: "al_request && al_request !== '-' ? al_request : undefined"
+        - disabled: false
+          name: UserAgent
+          value: "al_user_agent && al_user_agent !== '-' ? al_user_agent : undefined"
+        - disabled: false
+          name: SslCipher
+          value: "al_ssl_cipher && al_ssl_cipher !== '-' ? al_ssl_cipher : undefined"
+        - disabled: false
+          name: SslProtocol
+          value: "al_ssl_protocol && al_ssl_protocol !== '-' ? al_ssl_protocol : undefined"
+        - disabled: false
+          name: TargetGroupArn
+          value: "al_target_group_arn && al_target_group_arn !== '-' ? al_target_group_arn : undefined"
+        - disabled: false
+          name: TraceId
+          value: "al_trace_id && al_trace_id !== '-' ? al_trace_id : undefined"
+        - disabled: false
+          name: DomainName
+          value: "al_domain_name && al_domain_name !== '-' ? al_domain_name : undefined"
+        - disabled: false
+          name: ChosenCertArn
+          value: "al_chosen_cert_arn && al_chosen_cert_arn !== '-' ? al_chosen_cert_arn : undefined"
+        - disabled: false
+          name: MatchedRulePriority
+          value: "al_matched_rule_priority && al_matched_rule_priority !== '-' ? al_matched_rule_priority : undefined"
+        - disabled: false
+          name: RequestCreationTime
+          value: "al_request_creation_time && al_request_creation_time !== '-' ? al_request_creation_time : undefined"
+        - disabled: false
+          name: ActionsExecuted
+          value: "al_actions_executed && al_actions_executed !== '-' ? al_actions_executed : undefined"
+        - disabled: false
+          name: RedirectUrl
+          value: "al_redirect_url && al_redirect_url !== '-' ? al_redirect_url : undefined"
+        - disabled: false
+          name: LambdaErrorReason
+          value: "al_error_reason && al_error_reason !== '-' ? al_error_reason : undefined"
+        - disabled: false
+          name: TargetPortList
+          value: "al_target_port_list && al_target_port_list !== '-' ? al_target_port_list : undefined"
+        - disabled: false
+          name: TargetStatusCodeList
+          value: "al_target_status_code_list && al_target_status_code_list !== '-' ? al_target_status_code_list : undefined"
+        - disabled: false
+          name: Classification
+          value: "al_classification && al_classification !== '-' ? al_classification : undefined"
+        - disabled: false
+          name: ClassificationReason
+          value: "al_classification_reason && al_classification_reason !== '-' ? al_classification_reason : undefined"
+        - disabled: false
+          name: ConnTraceId
+          value: "al_conn_trace_id && al_conn_trace_id !== '-' ? al_conn_trace_id : undefined"
+      remove:
+        - "al_*"
+        - _raw
+        - _time
+        - source
+        - host
+        - index
+        - sourcetype
+        - cribl_*
+        - __*
+        - _path
+
+  - id: serde
+    filter: "true"
+    disabled: false
+    conf:
+      mode: reserialize
+      type: json
+      srcField: _raw
+      fields:
+        - TimeGenerated
+        - ALBType
+        - Alb
+        - ClientIp
+        - ClientPort
+        - TargetIp
+        - TargetPort
+        - RequestProcessingTime
+        - TargetProcessingTime
+        - ResponseProcessingTime
+        - ElbStatusCode
+        - TargetStatusCode
+        - ReceivedBytes
+        - SentBytes
+        - RequestRaw
+        - UserAgent
+        - SslCipher
+        - SslProtocol
+        - TargetGroupArn
+        - TraceId
+        - DomainName
+        - ChosenCertArn
+        - MatchedRulePriority
+        - RequestCreationTime
+        - ActionsExecuted
+        - RedirectUrl
+        - LambdaErrorReason
+        - TargetPortList
+        - TargetStatusCodeList
+        - Classification
+        - ClassificationReason
+        - ConnTraceId

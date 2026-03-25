@@ -1,0 +1,29 @@
+AWS Field,Position,Sentinel Column,Sentinel Type,Notes
+type,1,NLBType,string,Listener type: tls
+version,2,Version,string,Log entry version (currently 2.0)
+time,3,TimeGenerated,datetime,ISO 8601 format - end of TLS connection
+elb,4,Nlb,string,Resource ID of the NLB
+listener,5,Listener,string,Resource ID of the TLS listener
+client_port,6,ClientIPPort,string,Client IP:port as single string (not split)
+destination_port,7,TargetIPPort,string,Destination IP:port as single string (not split)
+connection_time,8,ConnectionTime,string,Total connection time in milliseconds
+tls_handshake_time,9,TlsHandshakeTime,string,"TLS handshake time in ms; note mixed case: Tls not TLS"
+received_bytes,10,ReceivedBytes,string,Bytes received from client (string type in Sentinel)
+sent_bytes,11,SentBytes,string,Bytes sent to client (string type in Sentinel)
+incoming_tls_alert,12,IncomingTLSAlert,string,TLS alert code received from client
+chosen_cert_arn,13,ChosenCertArn,string,ARN of the certificate presented to client
+chosen_cert_serial,14,ChosenCertSerial,string,Serial number of the chosen certificate
+tls_cipher,15,TLSCipher,string,TLS cipher suite negotiated
+tls_protocol_version,16,TLSProtocolVersion,string,"TLS protocol version (e.g., tlsv12)"
+tls_keyexchange,17,TLSNamedGroup,string,Named group used for key exchange (maps to TLSNamedGroup)
+domain_name,18,DomainName,string,SNI domain name from TLS handshake
+alpn_fe_protocol,19,ALPNFEProtocol,string,ALPN frontend protocol negotiated
+alpn_be_protocol,20,ALPNBEProtocol,string,ALPN backend protocol negotiated
+alpn_client_preference_list,21,ALPNClientPrefList,string,ALPN client preference list
+tls_connection_creation_time,22,TLSConnectionCreationTime,string,ISO 8601 time when TLS connection was created
+---,---,---,---,System columns (auto-populated by Sentinel)
+N/A,N/A,_BilledSize,real,System: record size in bytes
+N/A,N/A,_IsBillable,string,System: billing flag
+N/A,N/A,SourceSystem,string,System: source system identifier
+N/A,N/A,TenantId,string,System: workspace tenant ID
+N/A,N/A,Type,string,System: table name (AWSNLBAccessLogs)

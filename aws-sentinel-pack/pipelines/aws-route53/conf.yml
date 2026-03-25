@@ -1,0 +1,129 @@
+output: default
+streamtags: []
+groups: {}
+asyncFuncTimeout: 1000
+functions:
+  # ─────────────────────────────────────────────────────────────
+  # Step 1: Comment — Pipeline overview
+  # ─────────────────────────────────────────────────────────────
+  - id: comment
+    filter: "true"
+    disabled: false
+    conf:
+      comment: >-
+        AWS Route53 Resolver Query Logs → Microsoft Sentinel (AWSRoute53Resolver table).
+        Transforms Route53 Resolver JSON query logs into the native AWSRoute53Resolver
+        schema for ingestion via the Azure Monitor Logs Ingestion API (DCR).
+        Route53 logs use snake_case field names mapped to PascalCase Sentinel columns.
+        The answers array and srcids object map to dynamic columns.
+        Schema ref: https://learn.microsoft.com/en-us/azure/azure-monitor/reference/tables/awsroute53resolver
+
+  # ─────────────────────────────────────────────────────────────
+  # Step 2: Parse — Extract JSON from _raw if not already parsed
+  # ─────────────────────────────────────────────────────────────
+  - id: serde
+    filter: "true"
+    disabled: false
+    conf:
+      mode: extract
+      type: json
+      srcField: _raw
+
+  # ─────────────────────────────────────────────────────────────
+  # Step 3: Eval — Map Route53 fields to Sentinel AWSRoute53Resolver schema
+  # AWS uses snake_case; Sentinel uses PascalCase.
+  # query_timestamp is already ISO 8601 format.
+  # answers array and srcids object → dynamic columns.
+  # SrcPort is string type in Sentinel (not int).
+  # ─────────────────────────────────────────────────────────────
+  - id: eval
+    filter: "true"
+    disabled: false
+    conf:
+      add:
+        # ── TimeGenerated (mandatory) — from query_timestamp ──
+        - name: TimeGenerated
+          value: "query_timestamp ? new Date(query_timestamp).toISOString() : new Date().toISOString()"
+
+        # ── String fields (snake_case → PascalCase) ──
+        - name: Version
+          value: "version || undefined"
+        - name: AccountId
+          value: "account_id || undefined"
+        - name: Region
+          value: "region || undefined"
+        - name: VpcId
+          value: "vpc_id || undefined"
+        - name: QueryName
+          value: "query_name || undefined"
+        - name: QueryType
+          value: "query_type || undefined"
+        - name: QueryClass
+          value: "query_class || undefined"
+        - name: Rcode
+          value: "rcode || undefined"
+        - name: SrcAddr
+          value: "srcaddr || undefined"
+        - name: SrcPort
+          value: "srcport != null ? String(srcport) : undefined"
+        - name: Transport
+          value: "transport || undefined"
+        - name: LogType
+          value: "'Resolver"
+
+        # ── DNS Firewall fields ──
+        - name: FirewallRuleGroupId
+          value: "firewall_rule_group_id || undefined"
+        - name: FirewallRuleAction
+          value: "firewall_rule_action || undefined"
+        - name: FirewallDomainListId
+          value: "firewall_domain_list_id || undefined"
+
+        # ── Dynamic fields (arrays/objects → JSON) ──
+        - name: Answers
+          value: "answers ? JSON.stringify(answers) : undefined"
+        - name: SrcIds
+          value: "srcids ? JSON.stringify(srcids) : undefined"
+
+  # ─────────────────────────────────────────────────────────────
+  # Step 4: Eval (cleanup) → Remove original/unmapped fields
+  # ─────────────────────────────────────────────────────────────
+  - id: eval
+    filter: "true"
+    disabled: false
+    conf:
+      remove:
+        - version
+        - account_id
+        - region
+        - vpc_id
+        - query_timestamp
+        - query_name
+        - query_type
+        - query_class
+        - rcode
+        - answers
+        - srcaddr
+        - srcport
+        - transport
+        - srcids
+        - firewall_rule_group_id
+        - firewall_rule_action
+        - firewall_domain_list_id
+        - additional_properties
+        - is_delayed
+        - _raw
+        - _time
+        - cribl_*
+        - __inputId
+        - __outputId
+        - source
+        - sourcetype
+        - host
+        - index
+        - _path
+        - cribl_pipe
+
+  # ─────────────────────────────────────────────────────────────
+  # Step 5: Serialize → Output as JSON for the Logs Ingestion API
+  # ─────────────────────────────────────────────────────────────(�������͕ɑ�(�������ѕ�耉��Ք�(������ͅ����聙��͔(���������(�����������ɕ͕ɥ����(����������聩ͽ�(�������ɍ�����}Ʌ�(�������������ѕ����耈��y|���ѕ�С�����9����������y�ɥ��|���ѕ�С�����9�����(
